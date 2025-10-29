@@ -1,0 +1,10 @@
+.venv/
+.venv-test/
+pycache/
+*.pyc
+.idea/
+.vscode/
+.git/
+.DS_Store
+.env
+env.example
