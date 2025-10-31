@@ -1,33 +1,78 @@
 from ..api.models.star_wars_models import Mundo, Personaje, InfoPersonaje
 
+BASE_URL_FRONTEND = "http://localhost:3000/assets"
+
 DATOS_MUNDOS = {
-    1: Mundo(id=1, nombre="Kamino", imagen="https://statsic.wikia.nocookie.net/es.starwars/images/5/52/Kamino-TSWB.png"),
-    2: Mundo(id=2, nombre="Coruscant", imagen="https://static.wikia.nocookie.net/es.starwars/images/e/e1/Coruscant_Enciclopedia.png"),
-    3: Mundo(id=3, nombre="Naboo", imagen="https://static.wikia.nocookie.net/es.starwars/images/0/06/Naboo_Enciclopedia.png"),
+    1: Mundo(id=1, nombre="Tatooine", imagen=f"{BASE_URL_FRONTEND}/tatooine.png"),
+    2: Mundo(id=2, nombre="Hoth", imagen=f"{BASE_URL_FRONTEND}/hoth.png"),
+    3: Mundo(id=3, nombre="Endor", imagen=f"{BASE_URL_FRONTEND}/endor.png"),
 }
 
 DATOS_PERSONAJES = [
-    Personaje(id="obi", nombre="Obi-Wan Kenobi", tipo="heroe", mundo_id=1, info=InfoPersonaje(daño=80, defensa=90, ataque_especial=150), imagen="https://static.wikia.nocookie.net/es.starwars/images/3/30/Obi-Wan_Kenobi_Kenobi_series.png"),
-    Personaje(id="cody", nombre="Comandante Cody", tipo="heroe", mundo_id=1, info=InfoPersonaje(daño=70, defensa=80, ataque_especial=120), imagen="https://static.wikia.nocookie.net/es.starwars/images/2/29/Cody_S3.png"),
-    Personaje(id="shaak", nombre="Shaak Ti", tipo="heroe", mundo_id=1, info=InfoPersonaje(daño=75, defensa=85, ataque_especial=140), imagen="https://static.wikia.nocookie.net/es.starwars/images/e/e3/Shaak_Ti_sin_sable.png"),
-    Personaje(id="jango", nombre="Jango Fett", tipo="villano", mundo_id=1, info=InfoPersonaje(daño=90, defensa=70, ataque_especial=160), imagen="https://static.wikia.nocookie.net/es.starwars/images/6/6e/Jango_Fett_BD.png"),
-    Personaje(id="taun", nombre="Taun We", tipo="villano", mundo_id=1, info=InfoPersonaje(daño=30, defensa=50, ataque_especial=60), imagen="https://static.wikia.nocookie.net/es.starwars/images/3/36/Taun_We_TBB.png"),
-    Personaje(id="lama", nombre="Lama Su", tipo="villano", mundo_id=1, info=InfoPersonaje(daño=20, defensa=40, ataque_especial=50), imagen="https://static.wikia.nocookie.net/es.starwars/images/a/a9/Lama_Su_TBB.png"),
+    # --- Mundo 1: Tatooine ---
+    Personaje(id="luke", nombre="Luke Skywalker", tipo="heroe", mundo_id=1,
+              info=InfoPersonaje(daño=85, defensa=670, ataque_especial=160),
+              imagen=f"{BASE_URL_FRONTEND}/luke.png"),
+    Personaje(id="obiwan", nombre="Obi-Wan Kenobi", tipo="heroe", mundo_id=1,
+              info=InfoPersonaje(daño=80, defensa=690, ataque_especial=150),
+              imagen=f"{BASE_URL_FRONTEND}/obiwan.png"),
+    Personaje(id="r2d2", nombre="R2-D2", tipo="heroe", mundo_id=1,
+              info=InfoPersonaje(daño=30, defensa=670, ataque_especial=100),
+              imagen=f"{BASE_URL_FRONTEND}/r2d2.png"),
 
-    Personaje(id="anakin", nombre="Anakin Skywalker", tipo="heroe", mundo_id=2, info=InfoPersonaje(daño=90, defensa=80, ataque_especial=170), imagen="https://static.wikia.nocookie.net/es.starwars/images/c/c6/Anakin_Skywalker_perfil.png"),
-    Personaje(id="yoda", nombre="Yoda", tipo="heroe", mundo_id=2, info=InfoPersonaje(daño=70, defensa=95, ataque_especial=180), imagen="https://static.wikia.nocookie.net/es.starwars/images/1/1d/Yoda_en_su_silla.png"),
-    Personaje(id="padme", nombre="Padmé Amidala", tipo="heroe", mundo_id=2, info=InfoPersonaje(daño=60, defensa=60, ataque_especial=110), imagen="https://static.wikia.nocookie.net/es.starwars/images/a/a2/Padme_Amidala_perfil.png"),
-    Personaje(id="palpatine", nombre="Palpatine", tipo="villano", mundo_id=2, info=InfoPersonaje(daño=80, defensa=80, ataque_especial=200), imagen="https://static.wikia.nocookie.net/es.starwars/images/6/68/Palpatine_sith.png"),
-    Personaje(id="cad", nombre="Cad Bane", tipo="villano", mundo_id=2, info=InfoPersonaje(daño=85, defensa=60, ataque_especial=150), imagen="https://static.wikia.nocookie.net/es.starwars/images/c/c5/Cad_Bane_TBB_Perfil.png"),
-    Personaje(id="mas", nombre="Mas Amedda", tipo="villano", mundo_id=2, info=InfoPersonaje(daño=10, defensa=30, ataque_especial=20), imagen="https://static.wikia.nocookie.net/es.starwars/images/d/d5/Mas_Amedda_SWE.png"),
+    Personaje(id="jabba", nombre="Jabba the Hutt", tipo="villano", mundo_id=1,
+              info=InfoPersonaje(daño=60, defensa=680, ataque_especial=100),
+              imagen=f"{BASE_URL_FRONTEND}/jabba.png"),
+    Personaje(id="tusken", nombre="Tusken Raider", tipo="villano", mundo_id=1,
+              info=InfoPersonaje(daño=65, defensa=650, ataque_especial=70),
+              imagen=f"{BASE_URL_FRONTEND}/tusken.png"),
+    Personaje(id="greedo", nombre="Greedo", tipo="villano", mundo_id=1,
+              info=InfoPersonaje(daño=55, defensa=640, ataque_especial=60),
+              imagen=f"{BASE_URL_FRONTEND}/greedo.png"),
 
-    Personaje(id="quigon", nombre="Qui-Gon Jinn", tipo="heroe", mundo_id=3, info=InfoPersonaje(daño=75, defensa=85, ataque_especial=145), imagen="https://static.wikia.nocookie.net/es.starwars/images/7/7e/Qui-Gon_Jinn_perfil.png"),
-    Personaje(id="jarjar", nombre="Jar Jar Binks", tipo="heroe", mundo_id=3, info=InfoPersonaje(daño=50, defensa=70, ataque_especial=100), imagen="https://static.wikia.nocookie.net/es.starwars/images/8/8f/Jar_Jar_Binks_perfil.png"),
-    Personaje(id="nass", nombre="Jefe Nass", tipo="heroe", mundo_id=3, info=InfoPersonaje(daño=40, defensa=60, ataque_especial=70), imagen="https://static.wikia.nocookie.net/es.starwars/images/f/f3/BossNass-TatooineTrip.png"),
-    Personaje(id="maul", nombre="Darth Maul", tipo="villano", mundo_id=3, info=InfoPersonaje(daño=95, defensa=75, ataque_especial=175), imagen="https://static.wikia.nocookie.net/es.starwars/images/b/b2/Darth_Maul_perfil.png"),
-    Personaje(id="nute", nombre="Nute Gunray", tipo="villano", mundo_id=3, info=InfoPersonaje(daño=20, defensa=40, ataque_especial=30), imagen="https://static.wikia.nocookie.net/es.starwars/images/b/b0/Nute_Gunray_perfil.png"),
-    Personaje(id="droide", nombre="Droide de Batalla", tipo="villano", mundo_id=3, info=InfoPersonaje(daño=50, defensa=30, ataque_especial=50), imagen="https://static.wikia.nocookie.net/es.starwars/images/9/9b/B1_batdroid.png"),
+    # --- Mundo 2: Hoth ---
+    Personaje(id="leia", nombre="Princess Leia (Hoth)", tipo="heroe", mundo_id=2,
+              info=InfoPersonaje(daño=70, defensa=665, ataque_especial=130),
+              imagen=f"{BASE_URL_FRONTEND}/leia.png"),
+    Personaje(id="han", nombre="Han Solo (Hoth)", tipo="heroe", mundo_id=2,
+              info=InfoPersonaje(daño=75, defensa=660, ataque_especial=140),
+              imagen=f"{BASE_URL_FRONTEND}/han.png"),
+    Personaje(id="chewie", nombre="Chewbacca", tipo="heroe", mundo_id=2,
+              info=InfoPersonaje(daño=90, defensa=680, ataque_especial=120),
+              imagen=f"{BASE_URL_FRONTEND}/chewie.png"),
+
+    Personaje(id="vader", nombre="Darth Vader", tipo="villano", mundo_id=2,
+              info=InfoPersonaje(daño=100, defensa=690, ataque_especial=180),
+              imagen=f"{BASE_URL_FRONTEND}/vader.png"),
+    Personaje(id="veers", nombre="General Veers", tipo="villano", mundo_id=2,
+              info=InfoPersonaje(daño=70, defensa=670, ataque_especial=110),
+              imagen=f"{BASE_URL_FRONTEND}/veers.png"),
+    Personaje(id="wampa", nombre="Wampa", tipo="villano", mundo_id=2,
+              info=InfoPersonaje(daño=80, defensa=1360, ataque_especial=90),
+              imagen=f"{BASE_URL_FRONTEND}/wampa.png"),
+
+    # --- Mundo 3: Endor ---
+    Personaje(id="wicket", nombre="Wicket W. Warrick", tipo="heroe", mundo_id=3,
+              info=InfoPersonaje(daño=50, defensa=650, ataque_especial=80),
+              imagen=f"{BASE_URL_FRONTEND}/wicket.png"),
+    Personaje(id="lando", nombre="Lando Calrissian", tipo="heroe", mundo_id=3,
+              info=InfoPersonaje(daño=70, defensa=665, ataque_especial=135),
+              imagen=f"{BASE_URL_FRONTEND}/lando.png"),
+    Personaje(id="ackbar", nombre="Admiral Ackbar", tipo="heroe", mundo_id=3,
+              info=InfoPersonaje(daño=60, defensa=670, ataque_especial=110),
+              imagen=f"{BASE_URL_FRONTEND}/ackbar.png"),
+
+    Personaje(id="palpatine", nombre="Emperador Palpatine", tipo="villano", mundo_id=3,
+              info=InfoPersonaje(daño=80, defensa=680, ataque_especial=200),
+              imagen=f"{BASE_URL_FRONTEND}/palpatine.png"),
+    Personaje(id="scout", nombre="Scout Trooper", tipo="villano", mundo_id=3,
+              info=InfoPersonaje(daño=65, defensa=655, ataque_especial=75),
+              imagen=f"{BASE_URL_FRONTEND}/scout.png"),
+    Personaje(id="moff", nombre="Moff Jerjerrod", tipo="villano", mundo_id=3,
+              info=InfoPersonaje(daño=40, defensa=660, ataque_especial=50),
+              imagen=f"{BASE_URL_FRONTEND}/moff.png"),
 ]
+
 
 async def obtener_mundos_clon():
     return list(DATOS_MUNDOS.values())
