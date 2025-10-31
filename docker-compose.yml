@@ -2,12 +2,10 @@ services:
 
   app:
     build: .
-    container_name: ministerio_magia_app
+    container_name: ministerio_marvel_app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./src:/app/src
-      - ./templates:/app/templates
-      - ./static:/app/static
     ports:
       - "8000:8000"
     env_file:
@@ -16,9 +14,20 @@ services:
       postgres-db:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ministerio_marvel_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - app
+
   postgres-db:
     image: postgres:15-alpine
-    container_name: ministerio_magia_db
+    container_name: ministerio_marvel_db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -33,5 +42,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
 volumes:
   ministerio_magia_postgres_data:
