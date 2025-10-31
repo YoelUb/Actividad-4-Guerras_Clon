@@ -1,6 +1,6 @@
 from ..api.models.star_wars_models import Mundo, Personaje, InfoPersonaje
 
-BASE_URL_FRONTEND = "http://localhost:3000/assets"
+BASE_URL_FRONTEND = "http://localhost:3000/imagenes"
 
 DATOS_MUNDOS = {
     1: Mundo(id=1, nombre="Tatooine", imagen=f"{BASE_URL_FRONTEND}/tatooine.png"),
