@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from .ministerio_Marvel.core.logging_config import setup_logging
+from .ministerioMarvel.core.loggin_config import setup_logging
 
-from .ministerio_Marvel.api.endpoints import heroes
+from .ministerioMarvel.api.endpoints import heroes
 
 
 setup_logging()
