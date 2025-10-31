@@ -1,13 +1,335 @@
-body {
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+html, body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  background-color: #000;
+  width: 100%;
+  overflow-x: hidden;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.App {
+  text-align: center;
 }
+
+.App-header {
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 50px 20px;
+  font-size: calc(10px + 2vmin);
+  color: white;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.error {
+  color: #ff3838;
+  font-size: 1.2rem;
+  background-color: rgba(255, 56, 56, 0.1);
+  border: 1px solid #ff3838;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+  letter-spacing: 2px;
+}
+
+h1 {
+  font-size: 3rem;
+  color: #ffe81f;
+  margin-bottom: 40px;
+  text-shadow: 0 0 8px #ffe81f, 0 0 15px #ffe81f;
+}
+
+h2 {
+  font-size: 2.2rem;
+  color: #49dafd;
+}
+
+h3 {
+  font-size: 1.7rem;
+  margin-bottom: 15px;
+}
+
+.lista-mundos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.card-mundo {
+  background-color: rgba(22, 33, 62, 0.7);
+  border: 2px solid #49dafd;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 320px;
+  height: 280px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 15px rgba(73, 218, 253, 0.3);
+  position: relative;
+}
+
+.card-mundo span {
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+.card-mundo .img-mundo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  transition: transform 0.4s ease;
+}
+
+.card-mundo:hover {
+  transform: scale(1.05);
+  border-color: #ffe81f;
+  box-shadow: 0 0 25px rgba(255, 232, 31, 0.7);
+}
+
+.card-mundo:hover .img-mundo {
+  transform: scale(1.1);
+}
+
+
+
+.vista-personajes {
+  width: 100%;
+  max-width: 900px;
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.listas-personajes {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.columna-personajes {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 250px;
+  flex: 1;
+}
+
+.columna-personajes h3 {
+  border-bottom: 2px solid;
+  padding-bottom: 10px;
+}
+
+.columna-personajes h3.heroe {
+  color: #49dafd;
+  border-color: #49dafd;
+}
+
+.columna-personajes h3.villano {
+  color: #ff3838;
+  border-color: #ff3838;
+}
+
+.card-personaje {
+  background-color: rgba(40, 44, 52, 0.7);
+  border: 2px solid #4a4e5a;
+  border-radius: 8px;
+  padding: 15px;
+  width: 100%;
+  max-width: 280px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.img-personaje-peq {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 5px;
+  border: 2px solid #333;
+}
+
+.card-personaje.heroe:hover {
+  border-color: #49dafd;
+  box-shadow: 0 0 15px #49dafd;
+  transform: translateY(-5px);
+}
+
+.card-personaje.villano:hover {
+  border-color: #ff3838;
+  box-shadow: 0 0 15px #ff3838;
+  transform: translateY(-5px);
+}
+
+.info-personaje {
+  background-color: rgba(22, 33, 62, 0.8);
+  border: 2px solid #ffe81f;
+  border-radius: 10px;
+  padding: 30px;
+  margin-top: 20px;
+  width: 90%;
+  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 20px rgba(255, 232, 31, 0.5);
+  box-sizing: border-box;
+}
+
+.img-personaje-grande {
+  width: 300px;
+  height: 300px;
+  max-width: 90%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #ffe81f;
+  margin-bottom: 20px;
+  box-shadow: 0 0 20px #ffe81f;
+}
+
+.info-personaje .stats {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
+  padding: 15px;
+  margin: 20px 0;
+  width: 100%;
+  border: 1px solid #49dafd;
+  box-sizing: border-box;
+}
+
+.info-personaje .stats p {
+  text-align: left;
+  font-size: 1.1rem;
+  margin: 10px 0;
+  font-family: Arial, sans-serif;
+}
+
+.botones-accion, .btn-volver {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+button {
+  background-color: #49dafd;
+  border: none;
+  border-radius: 5px;
+  color: #000;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 10px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+  box-shadow: 0 0 10px rgba(73, 218, 253, 0.5);
+}
+
+button.btn-elegir {
+  background-color: #50c878;
+  color: white;
+  box-shadow: 0 0 10px rgba(80, 200, 120, 0.5);
+}
+
+button.btn-info {
+  background-color: #ffe81f;
+  color: #1a1a2e;
+  box-shadow: 0 0 10px rgba(255, 232, 31, 0.5);
+}
+
+button.btn-volver {
+  background-color: #ff3838;
+  color: white;
+  box-shadow: 0 0 10px rgba(255, 56, 56, 0.5);
+}
+
+button:hover {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+button:active {
+  transform: translateY(0) scale(1);
+}
+
+@media (max-width: 768px) {
+  .App-header {
+    padding: 20px 10px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .listas-personajes {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-personaje {
+    width: 95%;
+    min-width: 0;
+    padding: 20px;
+  }
+
+  .img-personaje-grande {
+    width: 200px;
+    height: 200px;
+  }
+
+  button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}
+
