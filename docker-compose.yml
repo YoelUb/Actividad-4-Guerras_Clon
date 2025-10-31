@@ -2,7 +2,7 @@ services:
 
   app:
     build: .
-    container_name: ministerio_marvel_app
+    container_name: guerras_clon_app
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./src:/app/src
@@ -17,7 +17,7 @@ services:
   frontend:
     build:
       context: ./frontend
-    container_name: ministerio_marvel_frontend
+    container_name: guerras_clon_frontend
     ports:
       - "3000:3000"
     volumes:
@@ -27,7 +27,7 @@ services:
 
   postgres-db:
     image: postgres:15-alpine
-    container_name: ministerio_marvel_db
+    container_name: guerras_clon_bd
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -44,4 +44,4 @@ services:
       retries: 5
 
 volumes:
-  ministerio_magia_postgres_data:
+  guerras_clon_postgres_data:
