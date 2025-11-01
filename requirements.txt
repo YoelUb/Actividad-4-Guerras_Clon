@@ -4,3 +4,8 @@ pydantic-settings
 fastapi[cors]
 pydantic
 httpx
+sqlalchemy
+asyncpg
+passlib[bcrypt]
+python-jose[cryptography]
+prometheus-fastapi-instrumentator

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Literal
-from ..models.star_wars_models import Mundo, Personaje
+from src.Guerras_Clon.api.models import Mundo, Personaje
 from ...services import swapi_service
 import random
 from pydantic import BaseModel

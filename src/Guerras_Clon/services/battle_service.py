@@ -1,6 +1,6 @@
 import random
 from abc import ABC, abstractmethod
-from ..api.models.star_wars_models import Personaje
+from src.Guerras_Clon.api.models import Personaje
 
 
 class Habilidad(ABC):

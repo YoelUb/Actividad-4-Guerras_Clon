@@ -1,4 +1,4 @@
-from ..api.models.star_wars_models import Mundo, Personaje, InfoPersonaje
+from src.Guerras_Clon.api.models import Mundo, Personaje, InfoPersonaje
 
 BASE_URL_FRONTEND = "http://localhost:3000/imagenes"
 
