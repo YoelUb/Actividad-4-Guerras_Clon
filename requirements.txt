@@ -10,3 +10,4 @@ passlib[bcrypt]
 python-jose[cryptography]
 prometheus-fastapi-instrumentator
 fastapi-mail
+bcrypt
