@@ -20,8 +20,8 @@ class AuditLogResponse(BaseModel):
     details: str | None
 
     class Config:
-        orm_mode = True
 
+        from_attributes = True
 
 
 @router.get(
@@ -34,7 +34,6 @@ async def get_audit_logs(
         limit: int = 100,
         db: AsyncSession = Depends(get_db)
 ):
-
     result = await db.execute(
         select(models.AuditLog)
         .order_by(models.AuditLog.timestamp.desc())
@@ -51,10 +50,8 @@ async def get_audit_logs(
     dependencies=[Depends(security.get_current_admin_user)]  # ¡PROTEGIDO!
 )
 async def get_app_stats(db: AsyncSession = Depends(get_db)):
-
     user_count_result = await db.execute(select(func.count(models.User.id)))
     total_users = user_count_result.scalar()
-
 
     logs_count_result = await db.execute(select(func.count(models.AuditLog.id)))
     total_logs = logs_count_result.scalar()
@@ -64,7 +61,6 @@ async def get_app_stats(db: AsyncSession = Depends(get_db)):
         "total_audit_logs": total_logs,
         "prometheus_metrics_available_at": "/metrics"
     }
-
 
 
 @router.post(

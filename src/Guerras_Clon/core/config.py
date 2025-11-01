@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import model_computed_field
+from pydantic import computed_field
 import os
 
 
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     EMAIL_APP_PASSWORD: str | None = None
 
 
-    @model_computed_field
+    @computed_field
     @property
     def DATABASE_URL(self) -> str:
         """
