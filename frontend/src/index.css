@@ -37,6 +37,7 @@ html, body {
   border: 1px solid #ff3838;
   padding: 10px;
   border-radius: 8px;
+  cursor: pointer;
 }
 
 h1, h2, h3 {
@@ -333,4 +334,145 @@ button:active {
     padding: 10px 15px;
     font-size: 0.9rem;
   }
+}
+
+
+
+.vista-batalla {
+  width: 90%;
+  max-width: 900px;
+}
+
+.luchadores {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.luchador-card-wrapper {
+  flex: 1;
+  margin: 10px;
+  min-width: 200px;
+  background-color: transparent;
+  border: none;
+  cursor: default;
+  transform: none;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.luchador-imagen-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+}
+
+.luchador-imagen-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 50%;
+  border: 4px solid;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+.luchador-imagen-container.jugador img {
+  border-color: #49dafd;
+  box-shadow: 0 0 15px #49dafd;
+}
+
+.luchador-imagen-container.oponente img {
+  border-color: #ff3838;
+  box-shadow: 0 0 15px #ff3838;
+}
+
+.luchador-imagen-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: background-color 0.3s ease;
+  pointer-events: none;
+}
+
+.luchador-imagen-container.bajo-hp .luchador-imagen-overlay {
+  background-color: rgba(255, 0, 0, 0.3);
+}
+
+.luchador-imagen-container.derrotado img {
+  filter: grayscale(100%);
+  border-color: #555;
+  box-shadow: 0 0 10px #555;
+}
+
+.luchador-imagen-container.derrotado .luchador-imagen-overlay {
+  background-color: transparent;
+}
+
+
+.barra-vida-exterior {
+  width: 100%;
+  background-color: #555;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #777;
+  margin-top: 10px;
+}
+
+.barra-vida-interior {
+  height: 20px;
+  transition: width 0.5s ease;
+}
+
+.barra-vida-interior.alta {
+  background-color: #50c878;
+}
+.barra-vida-interior.media {
+  background-color: #ffe81f;
+}
+.barra-vida-interior.baja {
+  background-color: #ff3838;
+}
+
+.log-batalla {
+  background-color: rgba(0,0,0,0.5);
+  border: 1px solid #4a4e5a;
+  border-radius: 8px;
+  margin-top: 20px;
+  padding: 15px;
+  height: 200px;
+  overflow-y: auto;
+  text-align: left;
+  font-family: Arial, sans-serif;
+  font-size: 0.9rem;
+}
+
+.log-linea {
+  margin: 5px 0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.log-linea.log-jugador {
+  color: #90ee90;
+}
+.log-linea.log-oponente {
+  color: #f08080;
+}
+.log-linea.log-esquivo {
+  color: #49dafd;
+}
+.log-linea.log-sistema {
+  color: #ffe81f;
+}
+.log-linea.log-default {
+  color: #fff;
 }

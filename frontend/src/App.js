@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-
+// ¡¡IMPORTANTE!!
+// Asegúrate de que estas líneas SÍ están en tu archivo local.
+// Las comento aquí solo para que la vista previa de código funcione.
+// import './App.css'
+// import './index.css'
 
 function App() {
   const [mundos, setMundos] = useState([]);
@@ -23,7 +27,10 @@ function App() {
         return response.json();
       })
       .then(data => setMundos(data))
-      .catch(err => setError(err.message));
+      .catch(err => {
+        console.error("Error fetching mundos:", err);
+        setError(`Failed to fetch mundos. Is the backend running at ${API_BASE_URL}?`);
+      });
   }, []);
 
   const handleMundoClick = (mundo) => {
@@ -40,7 +47,10 @@ function App() {
         return response.json();
       })
       .then(data => setPersonajes(data))
-      .catch(err => setError(err.message));
+      .catch(err => {
+        console.error("Error fetching personajes:", err);
+        setError(`Failed to fetch personajes. Is the backend running?`);
+      });
   };
 
   const handlePersonajeClick = (personaje) => {
@@ -60,7 +70,6 @@ function App() {
   };
 
 
-
   const handleIniciarBatalla = () => {
     if (!personajeSeleccionado || !mundoSeleccionado) return;
     setError(null);
@@ -75,7 +84,7 @@ function App() {
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
+        throw new Error(`Failed to fetch`);
       }
       return response.json();
     })
@@ -85,7 +94,10 @@ function App() {
       setPersonajeSeleccionado(null);
       setMundoSeleccionado(null);
     })
-    .catch(err => setError(err.message));
+    .catch(err => {
+      console.error("Error starting battle:", err);
+      setError(`Failed to start battle. Is the backend running?`);
+    });
   };
 
   const handleAccionBatalla = (tipo_accion) => {
@@ -93,7 +105,7 @@ function App() {
     setError(null);
 
     if (tipo_accion === 'ataque_especial' && estadoBatalla.jugador.especial_usado) {
-      setError("You have already used your special attack.");
+      setError("Ya has usado tu ataque especial.");
       return;
     }
 
@@ -107,14 +119,17 @@ function App() {
     })
     .then(response => {
        if (!response.ok) {
-          throw new Error(`Error HTTP: ${response.status}`);
+          throw new Error(`Failed to fetch`);
       }
       return response.json();
     })
     .then(data => {
       setEstadoBatalla(data);
     })
-    .catch(err => setError(err.message));
+    .catch(err => {
+      console.error("Error taking action:", err);
+      setError(`Failed to take action. Is the backend running?`);
+    });
   };
 
   const handleSalirBatalla = () => {
@@ -225,47 +240,74 @@ function App() {
 
     const { jugador, oponente, log_batalla, terminada } = estadoBatalla;
 
-    const LuchadorCard = ({ luchador, esJugador }) => (
-      <div className="luchador-card" style={{ flex: 1, margin: '10px', minWidth: '200px', backgroundColor: 'transparent', border: 'none' }}>
-        <img
-          src={luchador.personaje.imagen}
-          alt={luchador.personaje.nombre}
-          style={{
-            width: '200px',
-            height: '200px',
-            objectFit: 'cover',
-            borderRadius: '50%',
-            border: `4px solid ${esJugador ? '#49dafd' : '#ff3838'}`,
-            boxShadow: `0 0 15px ${esJugador ? '#49dafd' : '#ff3838'}`
-          }}
-          onError={(e) => { e.target.style.display = 'none'; }}
-        />
-        <h3>{luchador.personaje.nombre}</h3>
-        {/* Health Bar */}
-        <div style={{ width: '100%', backgroundColor: '#555', borderRadius: '5px', overflow: 'hidden', border: '1px solid #777' }}>
-          <div style={{
-            width: `${(luchador.hp_actual / luchador.personaje.info.defensa) * 100}%`,
-            backgroundColor: luchador.hp_actual / luchador.personaje.info.defensa > 0.5 ? '#50c878' : luchador.hp_actual / luchador.personaje.info.defensa > 0.2 ? '#ffe81f' : '#ff3838',
-            height: '20px',
-            transition: 'width 0.5s ease'
-          }}></div>
+    const LuchadorCard = ({ luchador, esJugador }) => {
+
+      const esBajoHp = luchador.hp_actual < 100;
+      const estaDerrotado = luchador.hp_actual <= 0;
+
+      const containerClasses = [
+        'luchador-imagen-container',
+        esJugador ? 'jugador' : 'oponente',
+        esBajoHp ? 'bajo-hp' : '',
+        estaDerrotado ? 'derrotado' : ''
+      ].join(' ');
+
+      const hpRatio = luchador.hp_actual / luchador.personaje.info.defensa;
+      const hpClass = hpRatio > 0.5 ? 'alta' : hpRatio > 0.25 ? 'media' : 'baja';
+
+      return (
+        <div className="luchador-card-wrapper">
+          <div className={containerClasses}>
+            <img
+              src={luchador.personaje.imagen}
+              alt={luchador.personaje.nombre}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            {/* Esta es la capa roja que pediste */}
+            <div className="luchador-imagen-overlay"></div>
+          </div>
+          <h3>{luchador.personaje.nombre}</h3>
+
+          <div className="barra-vida-exterior">
+            <div
+              className={`barra-vida-interior ${hpClass}`}
+              style={{ width: `${Math.max(0, hpRatio * 100)}%` }} // Aseguramos que no sea negativo
+            ></div>
+          </div>
+          <p style={{marginTop: '5px', fontSize: '1rem'}}>HP: {luchador.hp_actual} / {luchador.personaje.info.defensa}</p>
         </div>
-        <p style={{marginTop: '5px', fontSize: '1rem'}}>HP: {luchador.hp_actual} / {luchador.personaje.info.defensa}</p>
-      </div>
-    );
+      );
+    };
+
+    const getLogColorClass = (linea) => {
+      const nombreJugador = jugador.personaje.nombre;
+      const nombreOponente = oponente.personaje.nombre;
+
+      if (linea.startsWith('¡')) {
+        return 'log-sistema';
+      }
+      if (linea.includes('esquivado')) {
+        return 'log-esquivo';
+      }
+      if (linea.startsWith(nombreJugador)) {
+        return 'log-jugador';
+      }
+      if (linea.startsWith(nombreOponente)) {
+        return 'log-oponente';
+      }
+      return 'log-default';
+    };
+
 
     return (
-      <div className="vista-batalla" style={{ width: '90%', maxWidth: '900px' }}>
+      <div className="vista-batalla">
 
-        <div className="luchadores" style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div className="luchadores">
           <LuchadorCard luchador={jugador} esJugador={true} />
-
           <h2 style={{ color: '#ffe81f', alignSelf: 'center', margin: '20px' }}>VS</h2>
-
           <LuchadorCard luchador={oponente} esJugador={false} />
         </div>
 
-        {/* Action Buttons */}
         {!terminada ? (
           <div className="botones-accion" style={{ marginTop: '20px' }}>
             <button className="btn-info" onClick={() => handleAccionBatalla('ataque_normal')}>Atacar</button>
@@ -287,25 +329,9 @@ function App() {
           </div>
         )}
 
-        <div className="log-batalla" style={{
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          border: '1px solid #4a4e5a',
-          borderRadius: '8px',
-          marginTop: '20px',
-          padding: '15px',
-          height: '200px',
-          overflowY: 'auto',
-          textAlign: 'left',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '0.9rem'
-        }}>
+        <div className="log-batalla">
           {log_batalla.slice(0).reverse().map((linea, index) => (
-            <p key={index} style={{
-              margin: '5px 0',
-              borderBottom: '1px solid #333',
-              paddingBottom: '5px',
-              color: linea.includes('esquivado') ? '#ffc107' : (linea.includes(jugador.personaje.nombre) && linea.includes('causa')) ? '#90ee90' : (linea.includes(oponente.personaje.nombre) && linea.includes('causa')) ? '#f08080' : '#fff'
-            }}>
+            <p key={index} className={`log-linea ${getLogColorClass(linea)}`}>
               {linea}
             </p>
           ))}
@@ -318,7 +344,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>Star Wars: Guerras Clon</h1>
-        {error && <p className="error" onClick={() => setError(null)} style={{cursor: 'pointer'}}>Error: {error} (click to dismiss)</p>}
+        {error && <p className="error" onClick={() => setError(null)}>{error}</p>}
 
         {enBatalla
           ? renderBatalla()

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from typing import List, Dict
+from typing import List, Dict, Literal
 from ..models.star_wars_models import Mundo, Personaje
 from ...services import swapi_service
 import random
@@ -8,17 +8,6 @@ from ...services import battle_service
 from ...services.swapi_service import obtener_personajes_por_mundo, DATOS_PERSONAJES
 
 router = APIRouter()
-
-@router.get("/mundos", response_model=List[Mundo])
-async def get_mundos():
-    return await swapi_service.obtener_mundos_clon()
-
-@router.get("/mundos/{mundo_id}/personajes", response_model=Dict[str, List[Personaje]])
-async def get_personajes_por_mundo(mundo_id: int):
-    personajes = await swapi_service.obtener_personajes_por_mundo(mundo_id)
-    if not personajes["heroes"] and not personajes["villanos"]:
-        raise HTTPException(status_code=404, detail="Mundo no encontrado o sin personajes")
-    return personajes
 
 
 class IniciarBatallaRequest(BaseModel):
@@ -42,10 +31,24 @@ class EstadoBatalla(BaseModel):
 
 class AccionBatallaRequest(BaseModel):
     id_batalla: str
-    tipo_accion: str
+    tipo_accion: Literal["ataque_normal", "ataque_especial"]
 
 
-batallas_activas: dict[str, EstadoBatalla] = {}
+batallas_activas: Dict[str, EstadoBatalla] = {}
+
+
+
+@router.get("/mundos", response_model=List[Mundo])
+async def get_mundos():
+    return await swapi_service.obtener_mundos_clon()
+
+
+@router.get("/mundos/{mundo_id}/personajes", response_model=Dict[str, List[Personaje]])
+async def get_personajes_por_mundo(mundo_id: int):
+    personajes = await swapi_service.obtener_personajes_por_mundo(mundo_id)
+    if not personajes["heroes"] and not personajes["villanos"]:
+        raise HTTPException(status_code=404, detail="Mundo no encontrado o sin personajes")
+    return personajes
 
 
 
@@ -59,17 +62,13 @@ async def iniciar_batalla(request: IniciarBatallaRequest):
         raise HTTPException(status_code=404, detail="Personaje jugador no encontrado")
 
     tipo_jugador = jugador_data.tipo
-    if tipo_jugador == "heroe":
-        lista_oponentes = personajes_mundo["villanos"]
-    else:
-        lista_oponentes = personajes_mundo["heroes"]
+    lista_oponentes = personajes_mundo["villanos"] if tipo_jugador == "heroe" else personajes_mundo["heroes"]
 
     if not lista_oponentes:
         raise HTTPException(status_code=404, detail="No hay oponentes en este mundo")
 
     oponente_data = random.choice(lista_oponentes)
 
-    # 4. Crear estado de batalla
     id_batalla = f"batalla_{random.randint(1000, 9999)}"
     estado = EstadoBatalla(
         id_batalla=id_batalla,
@@ -91,6 +90,7 @@ async def iniciar_batalla(request: IniciarBatallaRequest):
 @router.post("/batalla/accion", response_model=EstadoBatalla)
 async def turno_batalla(request: AccionBatallaRequest):
 
+
     estado = batallas_activas.get(request.id_batalla)
     if not estado or estado.terminada:
         raise HTTPException(status_code=404, detail="Batalla no encontrada o terminada")
@@ -99,23 +99,24 @@ async def turno_batalla(request: AccionBatallaRequest):
     oponente = estado.oponente
     log = estado.log_batalla
 
-    if request.tipo_accion == "ataque_especial" and jugador.especial_usado:
+    accion_jugador = request.tipo_accion
+    if accion_jugador == "ataque_especial" and jugador.especial_usado:
         log.append(f"{jugador.personaje.nombre} intenta usar su ataque especial, ¡pero ya lo ha usado!")
-        request.tipo_accion = "ataque_normal"
+        accion_jugador = "ataque_normal"
 
-    habilidad_jugador = battle_service.factory_habilidades.get_habilidad(request.tipo_accion)
+    habilidad_jugador = battle_service.factory_habilidades.get_habilidad(accion_jugador)
     daño, msg = habilidad_jugador.ejecutar(jugador.personaje, oponente.personaje)
 
-    oponente.hp_actual -= daño
+    oponente.hp_actual = max(0, oponente.hp_actual - daño)
     log.append(msg)
-    if request.tipo_accion == "ataque_especial":
+    if accion_jugador == "ataque_especial":
         jugador.especial_usado = True
 
     if oponente.hp_actual <= 0:
         estado.terminada = True
         log.append(f"¡{jugador.personaje.nombre} ha ganado la batalla!")
+        batallas_activas[request.id_batalla] = estado
         return estado
-
 
     accion_ia = "ataque_normal"
     if not oponente.especial_usado and random.random() < 0.5:
@@ -125,12 +126,13 @@ async def turno_batalla(request: AccionBatallaRequest):
     habilidad_ia = battle_service.factory_habilidades.get_habilidad(accion_ia)
     daño_ia, msg_ia = habilidad_ia.ejecutar(oponente.personaje, jugador.personaje)
 
-    jugador.hp_actual -= daño_ia
+    jugador.hp_actual = max(0, jugador.hp_actual - daño_ia)
     log.append(msg_ia)
 
     if jugador.hp_actual <= 0:
         estado.terminada = True
         log.append(f"¡{oponente.personaje.nombre} ha ganado la batalla!")
+        batallas_activas[request.id_batalla] = estado
         return estado
 
     batallas_activas[request.id_batalla] = estado
