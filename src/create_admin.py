@@ -6,8 +6,8 @@ from src.Guerras_Clon.bd.database import SessionLocal, engine, Base
 from src.Guerras_Clon.bd.models import User
 from src.Guerras_Clon.security.security import get_password_hash
 
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "administrador")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Admin123")
 
 
 

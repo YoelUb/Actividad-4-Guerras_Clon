@@ -4,10 +4,9 @@ from sqlalchemy.future import select
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
-
-from ...bd import models
-from ...security import security
-from ...bd.database import get_db
+from src.Guerras_Clon.bd import models
+from src.Guerras_Clon.security import security
+from src.Guerras_Clon.bd.database import get_db
 
 router = APIRouter()
 

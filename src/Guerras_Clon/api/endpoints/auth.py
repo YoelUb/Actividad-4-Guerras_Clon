@@ -2,11 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
-
-from ...bd import models
-from ...security import security
-from ...security.auditing import create_audit_log
-from ...bd.database import get_db
+from src.Guerras_Clon.bd import models
+from src.Guerras_Clon.security import security
+from src.Guerras_Clon.security.auditing import create_audit_log
+from src.Guerras_Clon.bd.database import get_db
 
 router = APIRouter()
 

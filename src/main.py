@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from .Guerras_Clon.core.loggin_config import setup_logging
-from .Guerras_Clon.api.endpoints import star_wars, auth, admin
-from .Guerras_Clon.bd.database import engine, Base
+from src.Guerras_Clon.core.loggin_config import setup_logging
+from src.Guerras_Clon.api.endpoints import star_wars, auth, admin
+from src.Guerras_Clon.bd.database import engine, Base
 
 
 setup_logging()

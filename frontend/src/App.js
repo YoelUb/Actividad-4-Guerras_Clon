@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import './index.css';
 
@@ -24,13 +24,27 @@ function App() {
     const [appLoading, setAppLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     useEffect(() => {
         const storedToken = localStorage.getItem('starwars_token');
         if (storedToken) {
             setToken(storedToken);
         }
         setAppLoading(false);
+    }, []);
+
+    const handleLogout = useCallback(() => {
+        setToken(null);
+        setCurrentUser(null);
+        localStorage.removeItem('starwars_token');
+
+        setMundoSeleccionado(null);
+        setPersonajes({ heroes: [], villanos: [] });
+        setPersonajeSeleccionado(null);
+        setMostrarInfo(false);
+        setEstadoBatalla(null);
+        setEnBatalla(false);
+        setError(null);
+        setIntroVisto(false);
     }, []);
 
     useEffect(() => {
@@ -59,8 +73,7 @@ function App() {
         };
 
         fetchUser();
-    }, [token]);
-
+    }, [token, handleLogout]);
 
     useEffect(() => {
         if (token && currentUser && currentUser.role === 'jugador') {
@@ -80,21 +93,11 @@ function App() {
                     setError(`Failed to fetch mundos. Is the backend running?`);
                 });
         }
-    }, [token, currentUser]);
-
-
+    }, [token, currentUser, handleLogout]);
 
     const handleLoginSuccess = (newToken) => {
         setToken(newToken);
         localStorage.setItem('starwars_token', newToken);
-    };
-
-    const handleLogout = () => {
-        setToken(null);
-        setCurrentUser(null);
-        localStorage.removeItem('starwars_token');
-        handleVolverMundos();
-        setIntroVisto(false);
     };
 
     const handleEmpezarIntro = () => {
@@ -104,8 +107,6 @@ function App() {
         }
         setIntroVisto(true);
     };
-
-
 
     const handleMundoClick = (mundo) => {
         setMundoSeleccionado(mundo);
@@ -214,7 +215,6 @@ function App() {
     const handleSalirBatalla = () => {
         handleVolverMundos();
     };
-
 
     const renderIntro = () => (
         <div className="intro-container">
@@ -409,8 +409,6 @@ function App() {
         );
     };
 
-    // --- RENDERIZADO PRINCIPAL DE LA APP ---
-
     const renderPlayerGame = () => {
         return (
             <>
@@ -438,7 +436,7 @@ function App() {
 
     const renderAppContent = () => {
         if (appLoading) {
-            return <h2>Cargando...</h2>;
+            return D(<h2>Cargando...</h2>);
         }
 
         if (!introVisto) {

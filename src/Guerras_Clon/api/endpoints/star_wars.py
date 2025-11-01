@@ -1,11 +1,11 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Literal
-from src.Guerras_Clon.api.models import Mundo, Personaje
-from ...services import swapi_service
+from src.Guerras_Clon.api.schemas.star_wars_models import Mundo, Personaje
+from src.Guerras_Clon.services import swapi_service
 import random
 from pydantic import BaseModel
-from ...services import battle_service
-from ...services.swapi_service import obtener_personajes_por_mundo, DATOS_PERSONAJES
+from src.Guerras_Clon.services import battle_service
+from src.Guerras_Clon.services.swapi_service import obtener_personajes_por_mundo, DATOS_PERSONAJES
 
 router = APIRouter()
 
