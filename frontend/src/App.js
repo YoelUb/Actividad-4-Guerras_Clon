@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 import './index.css';
-
+import ForceChangePassword from './ForceChangePassword';
 import Auth from './Auth';
 import AdminDashboard from './AdminDashboard';
 
@@ -96,6 +96,11 @@ function App() {
     }, [token, currentUser, handleLogout]);
 
     const handleLoginSuccess = (newToken) => {
+        setToken(newToken);
+        localStorage.setItem('starwars_token', newToken);
+    };
+
+    const handleCredentialsUpdated = (newToken) => {
         setToken(newToken);
         localStorage.setItem('starwars_token', newToken);
     };
@@ -453,6 +458,13 @@ function App() {
 
         if (introVisto && token && currentUser) {
             if (currentUser.role === 'admin') {
+                if (currentUser.must_change_password) {
+                    return <ForceChangePassword
+                                token={token}
+                                onSuccess={handleCredentialsUpdated}
+                                username={currentUser.username}
+                           />;
+                }
                 return <AdminDashboard user={currentUser} onLogout={handleLogout} />;
             }
             if (currentUser.role === 'jugador') {

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from src.Guerras_Clon.bd.database import Base
 
@@ -9,8 +9,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
-
     role = Column(String, nullable=False, default="jugador")
+    must_change_password = Column(Boolean, default=False, nullable=False)
 
 
 class AuditLog(Base):

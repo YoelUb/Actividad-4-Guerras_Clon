@@ -39,6 +39,7 @@ class UserResponse(BaseModel):
     id: int
     username: str
     role: str
+    must_change_password: bool
 
     class Config:
         from_attributes = True

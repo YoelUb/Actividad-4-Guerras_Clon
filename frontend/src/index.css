@@ -653,3 +653,24 @@ button:active {
      padding: 12px 24px;
   }
 }
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #49dafd;
+  cursor: pointer;
+  font-size: 0.9rem;
+  user-select: none;
+  font-family: Arial, sans-serif;
+}
+
+.password-toggle-btn:hover {
+  color: #ffe81f;
+}
