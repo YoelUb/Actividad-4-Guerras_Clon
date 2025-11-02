@@ -436,7 +436,7 @@ function App() {
 
     const renderAppContent = () => {
         if (appLoading) {
-            return D(<h2>Cargando...</h2>);
+            return (<h2>Cargando...</h2>);
         }
 
         if (!introVisto) {

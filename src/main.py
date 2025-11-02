@@ -8,6 +8,10 @@ from src.Guerras_Clon.bd.database import engine, Base
 
 setup_logging()
 
+app = FastAPI(
+    title="API de Guerras Clon",
+    description="Sistema de gestión de mundos y personajes de Star Wars."
+)
 
 @app.on_event("startup")
 async def on_startup():
@@ -16,13 +20,10 @@ async def on_startup():
         await conn.run_sync(Base.metadata.create_all)
 
 
-    Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app).expose(app)
 
 
-app = FastAPI(
-    title="API de Guerras Clon",
-    description="Sistema de gestión de mundos y personajes de Star Wars."
-)
+
 
 origins = [
     "http://localhost:3000",
@@ -55,4 +56,4 @@ app.include_router(
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"GUERRAS CLON": "PREPARADO PARA LA GUERRA?"}
+    return {"GUERRAS CLON": "¿PREPARADO PARA LA GUERRA SOLDADO?"}

@@ -56,12 +56,15 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    user_role = user.role
+    user_username = user.username
+
     await create_audit_log(db, user.username, "USER_LOGIN", "Success")
     await db.commit()
 
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
-        data={"sub": user.username, "role": user.role},
+        data={"sub": user_username, "role": user_role},
         expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
