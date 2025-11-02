@@ -6,6 +6,9 @@ import logging
 from datetime import datetime, timezone
 from sqlalchemy.future import select
 from sqlalchemy import delete
+
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from src.Guerras_Clon.api.endpoints import star_wars, auth, admin
 from src.Guerras_Clon.bd.database import SessionLocal, engine, Base
 from src.Guerras_Clon.bd.models import VerificationCode
@@ -54,6 +57,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(
     CORSMiddleware,

@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
+const USERNAME_REGEX = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,20}$/;
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+const USERNAME_ERROR = "Usuario: 4-20 caracteres, al menos una letra, solo letras y números.";
+const PASSWORD_ERROR = "Contraseña: Mín 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.";
+
 function Auth({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
@@ -12,7 +18,7 @@ function Auth({ onLoginSuccess }) {
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const [registerStage, setRegisterStage] = useState('form'); // 'form' o 'verify'
+  const [registerStage, setRegisterStage] = useState('form');
   const [showPassword, setShowPassword] = useState(false);
 
   const handleAuthSubmit = async (e) => {
@@ -46,6 +52,18 @@ function Auth({ onLoginSuccess }) {
       }
     } else {
       if (registerStage === 'form') {
+
+        if (!USERNAME_REGEX.test(username)) {
+            setError(USERNAME_ERROR);
+            setLoading(false);
+            return;
+        }
+        if (!PASSWORD_REGEX.test(password)) {
+            setError(PASSWORD_ERROR);
+            setLoading(false);
+            return;
+        }
+
         try {
           const response = await fetch(`${API_BASE_URL}/auth/register/request`, {
             method: 'POST',
@@ -109,7 +127,7 @@ function Auth({ onLoginSuccess }) {
         <>
           <input
             type="text"
-            placeholder="Usuario"
+            placeholder="Usuario (4-20 caracteres)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -126,7 +144,7 @@ function Auth({ onLoginSuccess }) {
           <div className="password-container">
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Contraseña"
+              placeholder="Contraseña (mín 8, A, a, 1, $)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -213,7 +231,7 @@ function Auth({ onLoginSuccess }) {
           renderRegisterForm()
         )}
 
-        {error && <p className="error" style={{ cursor: 'default' }}>{error}</p>}
+        {error && <p className="error" style={{ cursor: 'default', fontSize: '0.9rem' }}>{error}</p>}
         {message && <p style={{ cursor: 'default', color: '#50c878' }}>{message}</p>}
 
         <button type="submit" className="btn-elegir" disabled={loading}>

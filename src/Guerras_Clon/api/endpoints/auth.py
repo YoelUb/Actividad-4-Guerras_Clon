@@ -16,10 +16,15 @@ from pydantic import SecretStr
 import asyncio
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from src.Guerras_Clon.core.config import settings
+import re
+
 
 router = APIRouter()
 logger = logging.getLogger("Guerras_Clon.auth")
 
+
+USERNAME_REGEX = r"^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,20}$"
+PASSWORD_REGEX = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+-=\[\]{};':\"\\|,.<>\/?]).{8,}$"
 
 conf = ConnectionConfig(
     MAIL_USERNAME=settings.MAIL_USERNAME,
@@ -97,6 +102,14 @@ async def request_registration(
     db_email = await security.get_user_by_email(db, email=user_in.email)
     if db_email:
         raise HTTPException(status_code=400, detail="Ese email ya está registrado.")
+
+    if not re.match(USERNAME_REGEX, user_in.username):
+        raise HTTPException(status_code=400,
+                            detail="Usuario inválido. Debe tener 4-20 caracteres, contener al menos una letra y solo puede usar letras y números.")
+
+    if not re.match(PASSWORD_REGEX, user_in.password):
+        raise HTTPException(status_code=400,
+                            detail="Contraseña insegura. Debe tener mín 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.")
 
     existing_code_stmt = delete(models.VerificationCode).where(models.VerificationCode.email == user_in.email)
     await db.execute(existing_code_stmt)
@@ -215,6 +228,14 @@ async def update_own_credentials(
         existing_user = await security.get_user(db, username=creds.username)
         if existing_user:
             raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
+
+    if not re.match(USERNAME_REGEX, creds.username):
+        raise HTTPException(status_code=400,
+                            detail="Usuario inválido. Debe tener 4-20 caracteres, contener al menos una letra y solo puede usar letras y números.")
+
+    if not re.match(PASSWORD_REGEX, creds.password):
+        raise HTTPException(status_code=400,
+                            detail="Contraseña insegura. Debe tener mín 8 caracteres, 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial.")
 
     current_user.username = creds.username
     hashed_password = security.get_password_hash(creds.password)
