@@ -3,20 +3,23 @@ import React, { useState, useEffect } from 'react';
 const API_BASE_URL = 'http://localhost:8000/api';
 
 function ForceChangePassword({ token, onSuccess, username: initialUsername }) {
-  const [username, setUsername] = useState(initialUsername || '');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    setUsername(initialUsername);
-  }, [initialUsername]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (username === initialUsername) {
+      setError('Debe elegir un nombre de usuario nuevo, no puede usar el de por defecto.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden.');
@@ -46,7 +49,7 @@ function ForceChangePassword({ token, onSuccess, username: initialUsername }) {
       }
 
       const data = await response.json();
-      onSuccess(data.access_token); // Pasa el nuevo token a App.js
+      onSuccess(data.access_token);
 
     } catch (err) {
       setError(err.message);
@@ -83,7 +86,7 @@ function ForceChangePassword({ token, onSuccess, username: initialUsername }) {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
         <input
           type="text"
-          placeholder="Nuevo Usuario"
+          placeholder={`Nuevo Usuario (no puede ser '${initialUsername}')`}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
@@ -107,14 +110,22 @@ function ForceChangePassword({ token, onSuccess, username: initialUsername }) {
           </span>
         </div>
 
-        <input
-          type={showPassword ? 'text' : 'password'}
-          placeholder="Confirmar Contraseña"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-          style={inputStyle}
-        />
+        <div className="password-container">
+          <input
+            type={showConfirmPassword ? 'text' : 'password'}
+            placeholder="Confirmar Contraseña"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            style={inputStyle}
+          />
+          <span
+            className="password-toggle-btn"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            {showConfirmPassword ? 'Ocultar' : 'Ver'}
+          </span>
+        </div>
 
         {error && <p className="error" style={{ cursor: 'default' }}>{error}</p>}
         <button type="submit" className="btn-elegir" disabled={loading}>

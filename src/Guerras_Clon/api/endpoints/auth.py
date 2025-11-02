@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import timedelta
 from src.Guerras_Clon.bd import models
 from src.Guerras_Clon.security import security
 from src.Guerras_Clon.security.auditing import create_audit_log
 from src.Guerras_Clon.bd.database import get_db
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -74,25 +74,35 @@ async def login_for_access_token(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.get("/me", response_model=security.UserResponse)
+async def read_users_me(
+        current_user: models.User = Depends(security.get_current_user)
+):
+    return current_user
+
+
 @router.post("/update-me", response_model=security.Token)
 async def update_own_credentials(
         creds: UpdateCredentialsRequest,
         db: AsyncSession = Depends(get_db),
         current_user: models.User = Depends(security.get_current_user)
 ):
-    # Validar que los campos no estén vacíos
     if not creds.username or not creds.password:
         raise HTTPException(status_code=400, detail="Username and password are required")
+
+
+    if current_user.must_change_password and creds.username == current_user.username:
+        raise HTTPException(status_code=400,
+                            detail="Debe elegir un nombre de usuario nuevo, no puede usar el de por defecto.")
 
     if creds.username != current_user.username:
         existing_user = await security.get_user(db, username=creds.username)
         if existing_user:
-            raise HTTPException(status_code=400, detail="Username already registered")
-        current_user.username = creds.username
+            raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
 
+    current_user.username = creds.username
     hashed_password = security.get_password_hash(creds.password)
     current_user.hashed_password = hashed_password
-
     current_user.must_change_password = False
 
     db.add(current_user)
@@ -107,10 +117,3 @@ async def update_own_credentials(
         expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
-
-@router.get("/me", response_model=security.UserResponse)
-async def read_users_me(
-        current_user: models.User = Depends(security.get_current_user)
-):
-    return current_user
