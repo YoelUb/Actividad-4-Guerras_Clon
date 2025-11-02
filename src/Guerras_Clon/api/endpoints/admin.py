@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
 from src.Guerras_Clon.bd import models
 from src.Guerras_Clon.security import security
 from src.Guerras_Clon.bd.database import get_db
+from src.Guerras_Clon.security.auditing import create_audit_log
 
 router = APIRouter()
 
