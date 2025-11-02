@@ -32,6 +32,7 @@ async def create_admin_user():
 
             admin_user = User(
                 username=ADMIN_USERNAME,
+                email=ADMIN_EMAIL,
                 hashed_password=hashed_password,
                 role="admin",
                 must_change_password=True
