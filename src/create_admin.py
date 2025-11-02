@@ -8,6 +8,7 @@ from src.Guerras_Clon.security.security import get_password_hash
 
 ADMIN_USERNAME = os.getenv("ADMIN_USERNAME", "administrador")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "Admin123")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@starwars.com")
 
 
 

@@ -8,6 +8,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(String, nullable=False, default="jugador")
     must_change_password = Column(Boolean, default=False, nullable=False)
@@ -21,3 +22,13 @@ class AuditLog(Base):
     username = Column(String, index=True)
     action = Column(String, index=True)
     details = Column(String, nullable=True)
+
+
+class VerificationCode(Base):
+    __tablename__ = "verification_codes"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, index=True, unique=True)
+    username = Column(String)
+    hashed_password = Column(String)
+    code = Column(String, index=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False)

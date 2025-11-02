@@ -1,14 +1,43 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import timedelta
+from sqlalchemy.future import select
+from sqlalchemy import delete
+from datetime import timedelta, datetime, timezone
 from src.Guerras_Clon.bd import models
 from src.Guerras_Clon.security import security
 from src.Guerras_Clon.security.auditing import create_audit_log
 from src.Guerras_Clon.bd.database import get_db
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+import random
+import string
+import logging
+from pydantic import SecretStr
+import asyncio
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
+from src.Guerras_Clon.core.config import settings
 
 router = APIRouter()
+logger = logging.getLogger("Guerras_Clon.auth")
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=settings.EMAIL_SENDER,
+    MAIL_PASSWORD=SecretStr(settings.EMAIL_APP_PASSWORD),
+    MAIL_FROM=settings.EMAIL_SENDER,
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
+)
+
+
+
+
+class VerifyRequest(BaseModel):
+    email: str
+    code: str
 
 
 class UpdateCredentialsRequest(BaseModel):
@@ -16,26 +45,115 @@ class UpdateCredentialsRequest(BaseModel):
     password: str
 
 
-@router.post("/register", response_model=security.Token)
-async def register_user(
+async def send_verification_email(to_email: str, code: str):
+    logger.info(f"Iniciando envío de correo de verificación a: {to_email}")
+
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;">
+        <div style="max-width: 600px; margin: auto; background: #0a0a0a; border: 1px solid #ffe81f; border-radius: 10px; padding: 20px; color: #ffffff;">
+            <h2 style="color: #ffe81f; text-align: center;">¡Bienvenido a Guerras Clon!</h2>
+            <p style="font-size: 16px; color: #ffffff;">Gracias por registrarte. Tu código de verificación es:</p>
+            <h1 style="color: #0a0a0a; background: #ffe81f; padding: 15px 25px; border-radius: 5px; text-align: center; font-size: 32px; letter-spacing: 3px;">
+                {code}
+            </h1>
+            <p style="font-size: 14px; color: #dddddd;">Este código caducará en 20 minutos.</p>
+            <p style="font-size: 12px; color: #888888; text-align: center; margin-top: 20px;">
+                Si no te has registrado tú, por favor ignora este correo.
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+
+    message = MessageSchema(
+        subject="Tu Código de Verificación de Guerras Clon",
+        recipients=[to_email],
+        body=html_content,
+        subtype=MessageType.html
+    )
+
+    try:
+        fm = FastMail(conf)
+        await fm.send_message(message)
+        logger.info(f"Correo de verificación enviado exitosamente a: {to_email}")
+    except Exception as e:
+        logger.error(f"Error al enviar correo a {to_email}: {e}")
+
+
+def generate_verification_code(length=6):
+    return ''.join(random.choices(string.digits, k=length))
+
+
+@router.post("/register/request", status_code=202)
+async def request_registration(
         user_in: security.UserCreate,
+        background_tasks: BackgroundTasks,
         db: AsyncSession = Depends(get_db)
 ):
     db_user = await security.get_user(db, username=user_in.username)
     if db_user:
-        raise HTTPException(status_code=400, detail="Username already registered")
+        raise HTTPException(status_code=400, detail="Ese nombre de usuario ya está registrado.")
+
+    db_email = await security.get_user_by_email(db, email=user_in.email)
+    if db_email:
+        raise HTTPException(status_code=400, detail="Ese email ya está registrado.")
+
+    existing_code_stmt = delete(models.VerificationCode).where(models.VerificationCode.email == user_in.email)
+    await db.execute(existing_code_stmt)
 
     hashed_password = security.get_password_hash(user_in.password)
-    new_user = models.User(
+    code = generate_verification_code()
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=20)
+
+    new_code = models.VerificationCode(
+        email=user_in.email,
         username=user_in.username,
         hashed_password=hashed_password,
+        code=code,
+        expires_at=expires_at
+    )
+    db.add(new_code)
+    await db.commit()
+
+    background_tasks.add_task(send_verification_email, user_in.email, code)
+
+    return {"message": "Se ha enviado un código de verificación a tu correo."}
+
+
+@router.post("/register/verify", response_model=security.Token)
+async def verify_registration(
+        verify_data: VerifyRequest,
+        db: AsyncSession = Depends(get_db)
+):
+    stmt = select(models.VerificationCode).where(
+        models.VerificationCode.email == verify_data.email,
+        models.VerificationCode.code == verify_data.code
+    )
+    result = await db.execute(stmt)
+    pending_user = result.scalars().first()
+
+    if not pending_user:
+        raise HTTPException(status_code=400, detail="Código o email incorrecto.")
+
+    if datetime.now(timezone.utc) > pending_user.expires_at:
+        await db.delete(pending_user)
+        await db.commit()
+        raise HTTPException(status_code=400, detail="El código de verificación ha expirado.")
+
+    new_user = models.User(
+        username=pending_user.username,
+        email=pending_user.email,
+        hashed_password=pending_user.hashed_password,
         role="jugador"
     )
     db.add(new_user)
 
-    await create_audit_log(db, new_user.username, "USER_REGISTER", "Success")
+    await db.delete(pending_user)
 
+    await create_audit_log(db, new_user.username, "USER_REGISTER", "Success")
     await db.commit()
+    await db.refresh(new_user)
 
     access_token_expires = timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
@@ -89,7 +207,6 @@ async def update_own_credentials(
 ):
     if not creds.username or not creds.password:
         raise HTTPException(status_code=400, detail="Username and password are required")
-
 
     if current_user.must_change_password and creds.username == current_user.username:
         raise HTTPException(status_code=400,
