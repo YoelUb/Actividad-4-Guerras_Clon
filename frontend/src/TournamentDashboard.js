@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import CreateTournament from './CreateTournament';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -8,7 +9,28 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    const allCharacters = [
+        { id: "luke", nombre: "Luke Skywalker" },
+        { id: "obiwan", nombre: "Obi-Wan Kenobi" },
+        { id: "r2d2", nombre: "R2-D2" },
+        { id: "jabba", nombre: "Jabba the Hutt" },
+        { id: "tusken", nombre: "Tusken Raider" },
+        { id: "greedo", nombre: "Greedo" },
+        { id: "leia", nombre: "Princess Leia (Hoth)" },
+        { id: "han", nombre: "Han Solo (Hoth)" },
+        { id: "chewie", nombre: "Chewbacca" },
+        { id: "vader", nombre: "Darth Vader" },
+        { id: "veers", nombre: "General Veers" },
+        { id: "wampa", nombre: "Wampa" },
+        { id: "wicket", nombre: "Wicket W. Warrick" },
+        { id: "lando", nombre: "Lando Calrissian" },
+        { id: "ackbar", nombre: "Admiral Ackbar" },
+        { id: "palpatine", nombre: "Emperador Palpatine" },
+        { id: "scout", nombre: "Scout Trooper" },
+        { id: "moff", nombre: "Moff Jerjerrod" },
+    ];
 
+    const [selectedCharId, setSelectedCharId] = useState(charToJoinWith ? charToJoinWith.id : allCharacters[0].id);
 
     const fetchOpenTournaments = useCallback(async () => {
         setLoading(true);
@@ -44,14 +66,14 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
         }
     }, [token]);
 
+
     useEffect(() => {
         fetchOpenTournaments();
     }, [fetchOpenTournaments]);
 
     const handleJoin = async (tournamentId) => {
-        if (!charToJoinWith) {
-            setError("Debes seleccionar un personaje desde la pantalla de mundos primero.");
-            onVolver();
+        if (!selectedCharId) {
+            setError("Error: No se ha seleccionado ningún personaje.");
             return;
         }
 
@@ -64,14 +86,16 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ character_id: charToJoinWith.id }) // Usar el ID del personaje
+                body: JSON.stringify({ character_id: selectedCharId }) // Usar el ID del estado
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || 'Error al unirse al torneo');
 
             setSelectedTournament(data);
             fetchOpenTournaments();
-            setCharToJoinWith(null);
+            if (setCharToJoinWith) {
+                setCharToJoinWith(null);
+            }
 
         } catch (err) {
             setError(err.message);
@@ -101,36 +125,55 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
     };
 
     const renderTournamentList = () => (
-        <div style={{width: '100%'}}>
-            <h2>Torneos Abiertos (1 Jugador + 15 IA)</h2>
+        <div style={{width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+
+            <CreateTournament
+                token={token}
+                onTournamentCreated={fetchOpenTournaments}
+            />
+
+            <h2 style={{borderTop: '1px solid #ffe81f', paddingTop: '20px', width: '80%'}}>
+                Torneos Abiertos (1 Jugador + 15 IA)
+            </h2>
             <button className="btn-info" onClick={fetchOpenTournaments} disabled={loading}>
                 Recargar Lista
             </button>
 
             {charToJoinWith && (
                 <div style={{padding: '10px', margin: '20px 0', border: '1px solid #ffe81f', backgroundColor: 'rgba(255, 232, 31, 0.1)', borderRadius: '8px'}}>
-                    <p style={{margin: 0}}>Personaje seleccionado: <strong style={{color: '#ffe81f'}}>{charToJoinWith.nombre}</strong></p>
+                    <p style={{margin: 0}}>Has entrado con: <strong style={{color: '#ffe81f'}}>{charToJoinWith.nombre}</strong></p>
                     <p style={{margin: '5px 0 0 0'}}>¡Elige un torneo para unirte y empezar!</p>
                 </div>
             )}
 
 
-            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center', width: '100%' }}>
                 {loading && openTournaments.length === 0 && <p>Buscando torneos...</p>}
-                {!loading && openTournaments.length === 0 && <p>No hay torneos abiertos. Pide a un admin que cree uno.</p>}
+                {!loading && openTournaments.length === 0 && <p>No hay torneos abiertos. ¡Crea uno!</p>}
 
                 {openTournaments.map(torneo => {
                     const isJoinedByHuman = torneo.participants.some(p => p.user !== null);
 
                     return (
-                        <div key={torneo.id} style={{ border: '1px solid #49dafd', padding: '15px', borderRadius: '8px', width: '80%', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                        <div key={torneo.id} style={{ border: '1px solid #49dafd', padding: '15px', borderRadius: '8px', width: '80%', maxWidth: '500px', backgroundColor: 'rgba(0,0,0,0.3)' }}>
                             <h3>{torneo.name}</h3>
                             <p>Participantes: {torneo.participants.length} / 16</p>
 
                             {!isJoinedByHuman ? (
-                                <button className="btn-elegir" onClick={() => handleJoin(torneo.id)} disabled={loading || !charToJoinWith}>
-                                    {charToJoinWith ? 'Unirse y Empezar' : 'Elige personaje primero'}
-                                </button>
+                                <div style={{display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center', margin: '10px 0'}}>
+                                    {!charToJoinWith && (
+                                        <select
+                                            value={selectedCharId}
+                                            onChange={e => setSelectedCharId(e.target.value)}
+                                            style={{padding: '8px', backgroundColor: '#333', color: 'white', border: '1px solid #49dafd'}}
+                                        >
+                                            {allCharacters.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                                        </select>
+                                    )}
+                                    <button className="btn-elegir" onClick={() => handleJoin(torneo.id)} disabled={loading}>
+                                        Unirse y Empezar
+                                    </button>
+                                </div>
                             ) : (
                                 <p style={{color: '#ff3838'}}>Torneo Lleno</p>
                             )}
