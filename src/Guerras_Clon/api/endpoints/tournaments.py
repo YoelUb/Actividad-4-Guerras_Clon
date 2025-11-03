@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import select, func  # Modificado: importación moderna de 'select'
 from sqlalchemy.orm import selectinload, joinedload
 from typing import List
 import random
 from datetime import datetime, timezone
-from sqlalchemy import func
+import logging
 
 from src.Guerras_Clon.bd import models
 from src.Guerras_Clon.security import security
@@ -15,6 +15,7 @@ from src.Guerras_Clon.services import battle_service, swapi_service
 from src.Guerras_Clon.security.auditing import create_audit_log
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 MAX_PARTICIPANTS = 16
 AI_PARTICIPANTS_COUNT = 15
@@ -113,7 +114,11 @@ async def get_tournament_details(tournament_id: int, db: AsyncSession = Depends(
         tournament_id,
         options=[
             selectinload(models.Tournament.participants).joinedload(models.TournamentParticipant.user),
-            selectinload(models.Tournament.matches),
+            selectinload(models.Tournament.matches).options(
+                selectinload(models.TournamentMatch.player1).joinedload(models.TournamentParticipant.user),
+                selectinload(models.TournamentMatch.player2).joinedload(models.TournamentParticipant.user),
+                selectinload(models.TournamentMatch.winner).joinedload(models.TournamentParticipant.user),
+            ),
             selectinload(models.Tournament.winner)
         ]
     )
@@ -243,6 +248,8 @@ async def simulate_match(
         db: AsyncSession = Depends(get_db),
         current_user: models.User = Depends(security.get_current_user)
 ):
+    logger.info(f"Simulación de partido {match_id} iniciada por {current_user.username}")
+
     match = await db.get(
         models.TournamentMatch,
         match_id,
@@ -274,44 +281,59 @@ async def simulate_match(
     current_round = match.round
 
     round_matches = [m for m in tournament.matches if m.round == current_round]
-    all_round_matches_completed = all(m.status == "completed" for m in round_matches)
+    all_round_matches_completed = all(m.status == "completed" or m.id == match.id for m in round_matches)
 
     if all_round_matches_completed:
-        winners = [await db.get(models.TournamentParticipant, m.winner_id) for m in
-                   sorted(round_matches, key=lambda x: x.match_index)]
+        winner_ids = [m.winner_id for m in sorted(round_matches, key=lambda x: x.match_index)]
 
         if current_round == 4:
             if winner_participant.user_id:
                 tournament.winner_id = winner_participant.user_id
             else:
+
                 tournament.winner_id = None
 
             tournament.status = "completed"
             tournament.end_time = datetime.now(timezone.utc)
             db.add(tournament)
-            await create_audit_log(db, winner_participant.user.username if winner_participant.user else "IA",
-                                   "TOURNAMENT_WIN",
-                                   f"Ganador de '{tournament.name}': {winner_participant.user.username if winner_participant.user else winner_participant.ai_name}")
+
+            winner_name = winner_participant.user.username if winner_participant.user else winner_participant.ai_name
+            await create_audit_log(db, winner_name, "TOURNAMENT_WIN", f"Ganador de '{tournament.name}': {winner_name}")
 
         else:
             next_round = current_round + 1
-            for i in range(len(winners) // 2):
+            for i in range(len(winner_ids) // 2):
                 new_match = models.TournamentMatch(
                     tournament_id=tournament.id,
                     round=next_round,
                     match_index=i,
-                    player1_id=winners[i * 2].id,
-                    player2_id=winners[i * 2 + 1].id,
+                    player1_id=winner_ids[i * 2],
+                    player2_id=winner_ids[i * 2 + 1],
                     status="pending"
                 )
                 db.add(new_match)
 
     await db.commit()
 
-    tournament_details = await get_tournament_details(match.tournament_id, db)
-    updated_match_schema = next((m for m in tournament_details.matches if m.id == match_id), None)
+    await db.refresh(match)
 
-    if not updated_match_schema:
-        raise HTTPException(status_code=500, detail="Error al refrescar el partido")
+    p1_schema = schemas.TournamentParticipantSchema.from_orm(match.player1)
+    p1_schema.character = await swapi_service.get_character_by_id(match.player1.character_id)
 
-    return updated_match_schema
+    p2_schema = schemas.TournamentParticipantSchema.from_orm(match.player2)
+    p2_schema.character = await swapi_service.get_character_by_id(match.player2.character_id)
+
+    winner_schema = None
+    if match.winner_id:
+        winner_p_model = await db.get(models.TournamentParticipant, match.winner_id,
+                                      options=[joinedload(models.TournamentParticipant.user)])
+        if winner_p_model:
+            winner_schema = schemas.TournamentParticipantSchema.from_orm(winner_p_model)
+            winner_schema.character = await swapi_service.get_character_by_id(winner_p_model.character_id)
+
+    final_match_schema = schemas.TournamentMatchSchema.from_orm(match)
+    final_match_schema.player1 = p1_schema
+    final_match_schema.player2 = p2_schema
+    final_match_schema.winner = winner_schema
+
+    return final_match_schema
