@@ -69,3 +69,13 @@ class TournamentCreateRequest(BaseModel):
 
 class TournamentJoinRequest(BaseModel):
     character_id: str
+
+
+class LeaderboardEntrySchema(BaseModel):
+    tournament_name: str
+    winner_name: str
+    duration_seconds: float
+    completed_at: datetime
+
+    class Config:
+        from_attributes = True
