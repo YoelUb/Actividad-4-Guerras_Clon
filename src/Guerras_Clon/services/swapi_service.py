@@ -1,4 +1,7 @@
 from src.Guerras_Clon.api.schemas.star_wars_models import Mundo, Personaje, InfoPersonaje
+# --- 1. AÑADIR IMPORT ---
+from typing import List
+# ------------------------
 
 BASE_URL_FRONTEND = "http://localhost:3000/imagenes"
 
@@ -9,7 +12,6 @@ DATOS_MUNDOS = {
 }
 
 DATOS_PERSONAJES = [
-    # --- Mundo 1: Tatooine ---
     Personaje(id="luke", nombre="Luke Skywalker", tipo="heroe", mundo_id=1,
               info=InfoPersonaje(daño=85, defensa=670, ataque_especial=160),
               imagen=f"{BASE_URL_FRONTEND}/luke.png"),
@@ -87,3 +89,9 @@ async def obtener_personajes_por_mundo(mundo_id: int):
         "heroes": heroes[:3],
         "villanos": villanos[:3]
     }
+
+async def get_character_by_id(character_id: str) -> Personaje | None:
+    return next((p for p in DATOS_PERSONAJES if p.id == character_id), None)
+
+async def get_all_characters() -> List[Personaje]:
+    return DATOS_PERSONAJES
