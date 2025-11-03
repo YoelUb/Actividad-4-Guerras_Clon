@@ -86,7 +86,7 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ character_id: selectedCharId }) // Usar el ID del estado
+                body: JSON.stringify({ character_id: selectedCharId })
             });
             const data = await response.json();
             if (!response.ok) throw new Error(data.detail || 'Error al unirse al torneo');
@@ -129,7 +129,7 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
 
             <CreateTournament
                 token={token}
-                onTournamentCreated={fetchOpenTournaments}
+                onTournamentCreated={fetchOpenTournaments} // <-- Esto refresca la lista
             />
 
             <h2 style={{borderTop: '1px solid #ffe81f', paddingTop: '20px', width: '80%'}}>
@@ -161,6 +161,7 @@ function TournamentDashboard({ currentUser, token, onVolver, charToJoinWith, set
 
                             {!isJoinedByHuman ? (
                                 <div style={{display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center', margin: '10px 0'}}>
+                                    {/* ESTE ES EL DESPLEGABLE QUE FALTABA */}
                                     {!charToJoinWith && (
                                         <select
                                             value={selectedCharId}
