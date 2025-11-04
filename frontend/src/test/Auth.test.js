@@ -17,17 +17,16 @@ describe('Componente Auth', () => {
 
         expect(screen.getByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/usuario/i)).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/^contraseña \(/i)).toBeInTheDocument(); // Regex para la contraseña de registro
+        expect(screen.getByPlaceholderText("Contraseña")).toBeInTheDocument();
         expect(screen.queryByPlaceholderText(/email/i)).not.toBeInTheDocument();
         expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
     });
 
     test('2. Cambia a modo de registro al hacer clic en el enlace', async () => {
-        const user = userEvent.setup();
         render(<Auth onLoginSuccess={() => {}} />);
 
         const toggleLink = screen.getByText(/¿no tienes cuenta\? regístrate/i);
-        await user.click(toggleLink);
+        await userEvent.click(toggleLink);
 
         expect(screen.getByRole('heading', { name: /registrarse/i })).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/usuario \(4-20 caracteres\)/i)).toBeInTheDocument();
@@ -38,24 +37,22 @@ describe('Componente Auth', () => {
     });
 
     test('3. Muestra error de validación de usuario en registro', async () => {
-        const user = userEvent.setup();
         render(<Auth onLoginSuccess={() => {}} />);
 
         // Ir a registro
-        await user.click(screen.getByText(/¿no tienes cuenta\? regístrate/i));
+        await userEvent.click(screen.getByText(/¿no tienes cuenta\? regístrate/i));
 
-        await user.type(screen.getByPlaceholderText(/usuario \(4-20 caracteres\)/i), "123");
-        await user.type(screen.getByPlaceholderText(/email/i), "test@test.com");
-        await user.type(screen.getByPlaceholderText(/contraseña \(mín 8, A, a, 1, \$\)/i), "ValidPass123!");
+        await userEvent.type(screen.getByPlaceholderText(/usuario \(4-20 caracteres\)/i), "123");
+        await userEvent.type(screen.getByPlaceholderText(/email/i), "test@test.com");
+        await userEvent.type(screen.getByPlaceholderText(/contraseña \(mín 8, A, a, 1, \$\)/i), "ValidPass123!");
 
-        await user.click(screen.getByRole('button', { name: /enviar código/i }));
+        await userEvent.click(screen.getByRole('button', { name: /enviar código/i }));
 
         expect(await screen.findByText(/usuario: 4-20 caracteres/i)).toBeInTheDocument();
         expect(global.fetch).not.toHaveBeenCalled();
     });
 
     test('4. Envía solicitud de registro y pasa a la verificación', async () => {
-        const user = userEvent.setup();
         const mockOnLogin = jest.fn();
 
         global.fetch.mockResolvedValue({
@@ -65,13 +62,13 @@ describe('Componente Auth', () => {
 
         render(<Auth onLoginSuccess={mockOnLogin} />);
 
-        await user.click(screen.getByText(/¿no tienes cuenta\? regístrate/i));
+        await userEvent.click(screen.getByText(/¿no tienes cuenta\? regístrate/i));
 
-        await user.type(screen.getByPlaceholderText(/usuario \(4-20 caracteres\)/i), "usuarioValido");
-        await user.type(screen.getByPlaceholderText(/email/i), "test@test.com");
-        await user.type(screen.getByPlaceholderText(/contraseña \(mín 8, A, a, 1, \$\)/i), "ValidPass123!");
+        await userEvent.type(screen.getByPlaceholderText(/usuario \(4-20 caracteres\)/i), "usuarioValido");
+        await userEvent.type(screen.getByPlaceholderText(/email/i), "test@test.com");
+        await userEvent.type(screen.getByPlaceholderText(/contraseña \(mín 8, A, a, 1, \$\)/i), "ValidPass123!");
 
-        await user.click(screen.getByRole('button', { name: /enviar código/i }));
+        await userEvent.click(screen.getByRole('button', { name: /enviar código/i }));
 
         expect(global.fetch).toHaveBeenCalledWith(
             'http://localhost:8000/api/auth/register/request',
@@ -88,7 +85,7 @@ describe('Componente Auth', () => {
     });
 
     test('5. Envía login exitoso y llama a onLoginSuccess', async () => {
-        const user = userEvent.setup();
+        // CORREGIDO: Eliminado userEvent.setup() y se usa userEvent directamente
         const mockOnLogin = jest.fn();
         const mockToken = "fake.jwt.token";
 
@@ -101,11 +98,11 @@ describe('Componente Auth', () => {
         render(<Auth onLoginSuccess={mockOnLogin} />);
 
         // Rellenar formulario
-        await user.type(screen.getByPlaceholderText(/usuario/i), "testuser");
-        await user.type(screen.getByPlaceholderText(/^contraseña \(/i), "testpass");
+        await userEvent.type(screen.getByPlaceholderText(/usuario/i), "testuser");
+        await userEvent.type(screen.getByPlaceholderText("Contraseña"), "testpass"); // CORREGIDO el placeholder
 
         // Enviar
-        await user.click(screen.getByRole('button', { name: /entrar/i }));
+        await userEvent.click(screen.getByRole('button', { name: /entrar/i }));
 
         await waitFor(() => {
             expect(mockOnLogin).toHaveBeenCalledWith(mockToken);
@@ -121,7 +118,6 @@ describe('Componente Auth', () => {
     });
 
     test('6. Muestra error en login fallido', async () => {
-        const user = userEvent.setup();
         const mockOnLogin = jest.fn();
 
         global.fetch.mockResolvedValue({
@@ -131,9 +127,9 @@ describe('Componente Auth', () => {
 
         render(<Auth onLoginSuccess={mockOnLogin} />);
 
-        await user.type(screen.getByPlaceholderText(/usuario/i), "wrong");
-        await user.type(screen.getByPlaceholderText(/^contraseña \(/i), "wrong");
-        await user.click(screen.getByRole('button', { name: /entrar/i }));
+        await userEvent.type(screen.getByPlaceholderText(/usuario/i), "wrong");
+        await userEvent.type(screen.getByPlaceholderText("Contraseña"), "wrong"); // CORREGIDO el placeholder
+        await userEvent.click(screen.getByRole('button', { name: /entrar/i }));
 
         const errorMessage = await screen.findByText("Error al iniciar sesión");
         expect(errorMessage).toBeInTheDocument();

@@ -78,7 +78,6 @@ describe('Componente TournamentDashboard', () => {
     });
 
     test('3. Clica en "Ver Estado" y muestra los detalles del torneo', async () => {
-        const user = userEvent.setup();
 
         global.fetch.mockResolvedValueOnce({
             ok: true,
@@ -101,7 +100,7 @@ describe('Componente TournamentDashboard', () => {
 
         const verEstadoButton = (await screen.findAllByText(/ver estado/i))[0];
 
-        await user.click(verEstadoButton);
+        await userEvent.click(verEstadoButton);
 
         expect(await screen.findByText(/cuadro del torneo/i)).toBeInTheDocument();
         expect(screen.getByText('IA: Vader (Vader)')).toBeInTheDocument();
