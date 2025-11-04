@@ -92,7 +92,7 @@ El sistema está orquestado con `docker-compose` y se divide en tres servicios p
 
 1.  **Clonar el repositorio:**
     ```bash
-    git clone [https://github.com/YoelUb/Actividad-4-Guerras_Clon.git](https://github.com/YoelUb/Actividad-4-Guerras_Clon.git)
+    git clone https://github.com/YoelUb/Actividad-4-Guerras_Clon.git
     cd Actividad-4-Guerras_Clon
     ```
 
