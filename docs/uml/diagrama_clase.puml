@@ -1,0 +1,74 @@
+@startuml
+left to right direction
+
+class User {
+    +id: Integer
+    +username: String
+    +email: String
+    +hashed_password: String
+    +role: String
+    +must_change_password: Boolean
+}
+
+class Tournament {
+    +id: Integer
+    +name: String
+    +status: String
+    +winner_id: Integer
+    +start_time: DateTime
+    +end_time: DateTime
+}
+
+class TournamentParticipant {
+    +id: Integer
+    +tournament_id: Integer
+    +character_id: String
+    +user_id: Integer
+    +ai_name: String
+}
+
+class TournamentMatch {
+    +id: Integer
+    +tournament_id: Integer
+    +round: Integer
+    +match_index: Integer
+    +player1_id: Integer
+    +player2_id: Integer
+    +winner_id: Integer
+    +status: String
+}
+
+class AuditLog {
+    +id: Integer
+    +timestamp: DateTime
+    +username: String
+    +action: String
+}
+
+class VerificationCode {
+    +id: Integer
+    +email: String
+    +code: String
+    +expires_at: DateTime
+}
+
+
+
+
+Tournament "1" --> "0..1" User : winner
+
+
+User "1" --> "0..*" TournamentParticipant : participa en
+
+
+Tournament "1" --> "0..*" TournamentParticipant : contiene
+
+
+Tournament "1" --> "0..*" TournamentMatch : contiene
+
+
+TournamentMatch "1" --> "0..1" TournamentParticipant : player1
+TournamentMatch "1" --> "0..1" TournamentParticipant : player2
+TournamentMatch "1" --> "0..1" TournamentParticipant : winner
+
+@enduml

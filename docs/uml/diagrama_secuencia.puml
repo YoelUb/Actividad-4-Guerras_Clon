@@ -1,0 +1,72 @@
+@startuml
+actor Jugador
+participant Frontend
+participant "Backend (API)" as Backend
+participant ServicioPersonajes
+database BaseDeDatos
+
+Jugador -> Frontend: Clica "Unirse al Torneo"
+activate Frontend
+Frontend -> Backend: POST /api/tournament/{id}/join (con character_id)
+activate Backend
+
+Backend -> BaseDeDatos: Consultar Torneo (ID)
+activate BaseDeDatos
+BaseDeDatos --> Backend: Datos del Torneo
+deactivate BaseDeDatos
+
+Backend -> ServicioPersonajes: get_all_characters()
+activate ServicioPersonajes
+ServicioPersonajes --> Backend: Lista de Personajes (para IA)
+deactivate ServicioPersonajes
+
+Backend -> Backend: Generar 15 IAs (participantes)
+
+activate BaseDeDatos
+Backend -> BaseDeDatos: Guardar participante Jugador
+Backend -> BaseDeDatos: Guardar 15 participantes IA
+Backend -> BaseDeDatos: Crear partidas de Ronda 1
+Backend -> BaseDeDatos: Actualizar estado de Torneo a "active"
+Backend -> BaseDeDatos: commit()
+deactivate BaseDeDatos
+
+Backend --> Frontend: 200 OK (Torneo actualizado)
+deactivate Backend
+Frontend --> Jugador: Muestra cuadro del torneo
+deactivate Frontend
+
+== Flujo de Simulación ==
+
+Jugador -> Frontend: Clica "Simular Partido"
+activate Frontend
+Frontend -> Backend: POST /api/tournament/match/{id}/simulate
+activate Backend
+
+Backend -> BaseDeDatos: Consultar Partido (ID)
+activate BaseDeDatos
+BaseDeDatos --> Backend: Datos del Partido (con player1, player2)
+deactivate BaseDeDatos
+
+activate ServicioPersonajes
+Backend -> ServicioPersonajes: get_character_by_id(player1.char_id)
+ServicioPersonajes --> Backend: Datos Personaje 1
+Backend -> ServicioPersonajes: get_character_by_id(player2.char_id)
+ServicioPersonajes --> Backend: Datos Personaje 2
+deactivate ServicioPersonajes
+
+Backend -> Backend: Ejecutar _simulate_battle(p1, p2)
+
+activate BaseDeDatos
+Backend -> BaseDeDatos: Actualizar Partido (winner_id, status="completed")
+Backend -> Backend: (Lógica: ¿Terminó la ronda?)
+alt (Si terminó)
+    Backend -> BaseDeDatos: Crear nuevas partidas (Ronda Siguiente)
+end
+Backend -> BaseDeDatos: commit()
+deactivate BaseDeDatos
+
+Backend --> Frontend: 200 OK (Partido simulado)
+deactivate Backend
+Frontend --> Jugador: Actualiza el cuadro
+deactivate Frontend
+@enduml

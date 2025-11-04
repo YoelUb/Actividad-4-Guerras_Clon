@@ -1,0 +1,76 @@
+@startuml
+left to right direction
+
+
+
+object "jugador1: User" as jugador1 {
+    id = 1
+    username = "Yoel"
+    role = "jugador"
+}
+
+object "copaEndor: Tournament" as copaEndor {
+    id = 101
+    name = "Copa de Endor"
+    status = "active"
+    winner_id = null
+}
+
+object "p1: TournamentParticipant" as p1 {
+    id = 1
+    character_id = "luke"
+    ai_name = null
+}
+
+object "p2_ia: TournamentParticipant" as p2_ia {
+    id = 2
+    character_id = "vader"
+    ai_name = "IA: Vader"
+}
+
+object "p3_ia: TournamentParticipant" as p3_ia {
+    id = 3
+    character_id = "palpatine"
+    ai_name = "IA: Palpatine"
+}
+
+object "p4_ia: TournamentParticipant" as p4_ia {
+    id = 4
+    character_id = "scout"
+    ai_name = "IA: Scout"
+}
+
+object "partido_R1_1: TournamentMatch" as partido_R1_1 {
+    id = 1
+    round = 1
+    status = "completed"
+}
+
+object "partido_R1_2: TournamentMatch" as partido_R1_2 {
+    id = 2
+    round = 1
+    status = "pending"
+}
+
+
+
+copaEndor "1" -- "0..1" jugador1 : "winner"
+
+copaEndor "1" -- "0..*" p1 : "contiene"
+copaEndor "1" -- "0..*" p2_ia : "contiene"
+copaEndor "1" -- "0..*" p3_ia : "contiene"
+copaEndor "1" -- "0..*" p4_ia : "contiene"
+
+copaEndor "1" -- "0..*" partido_R1_1 : "contiene"
+copaEndor "1" -- "0..*" partido_R1_2 : "contiene"
+
+jugador1 "1" -- "1" p1 : "es"
+
+partido_R1_1 "1" -- "1" p1 : "player1"
+partido_R1_1 "1" -- "1" p2_ia : "player2"
+partido_R1_1 "1" -- "1" p1 : "winner"
+
+partido_R1_2 "1" -- "1" p3_ia : "player1"
+partido_R1_2 "1" -- "1" p4_ia : "player2"
+partido_R1_2 "1" .. "0..1" p3_ia : "winner (null)"
+@enduml
