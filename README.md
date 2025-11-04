@@ -87,6 +87,9 @@ El sistema está orquestado con `docker-compose` y se divide en tres servicios p
 
 ## ⚙️ Instalación y Ejecución
 
+
+  **¡IMPORTANTE!** Debes tener instalado **GIT** para poder hacerlo desde el terminal con mayor comodidad
+
 1.  **Clonar el repositorio:**
     ```bash
     git clone [https://github.com/YoelUb/Actividad-4-Guerras_Clon.git](https://github.com/YoelUb/Actividad-4-Guerras_Clon.git)
@@ -101,7 +104,6 @@ El sistema está orquestado con `docker-compose` y se divide en tres servicios p
 
     Edita el archivo `.env` con tus credenciales. Asegúrate de configurar tus credenciales de Gmail (`MAIL_USERNAME`, `MAIL_PASSWORD`) para que el registro de usuarios funcione.
 
-    **¡IMPORTANTE!** Debes cambiar `DB_HOST=localhost` a `DB_HOST=postgres-db` y actualizar la `DATABASE_URL` para que coincida. Esto es vital para que el contenedor de la API (`app`) pueda comunicarse con el contenedor de la base de datos (`postgres-db`).
 
     Tu archivo `.env` debe verse así:
     ```ini
@@ -150,26 +152,9 @@ Las pruebas del backend están configuradas para ejecutarse contra el contenedor
 1.  **Abre una nueva terminal.**
     ¡IMPORTANTE! --> No detengas `docker-compose up`. Los contenedores deben estar ejecutándose.
 
-2.  **Crea y activa un entorno virtual local (solo para los tests):**
+2.  **Ejecuta este comando para los test de Backend**
     ```bash
-    python3 -m venv .venv-test
-    source .venv-test/bin/activate
-    ```
-
-3.  **Instala las dependencias de desarrollo:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Ejecuta pytest:**
-    El comando `PYTHONPATH=.` es crucial para que Pytest pueda encontrar los módulos dentro de la carpeta `src`.
-    ```bash
-    PYTHONPATH=. pytest -v
-    ```
-
-5.  **Desactiva el entorno de pruebas una vez acabado:**
-    ```bash
-    deactivate
+    docker-compose exec app pytest -v
     ```
 
 ### Pruebas del Frontend (React Testing Library)
